@@ -1,0 +1,106 @@
+<script>
+        const player = videojs('my-video');
+        let currentLink = ""; 
+        const errorOverlay = document.getElementById('error-overlay');
+
+        // PENGATURAN GOOGLE SHEET KHUSUS SHEET 2
+        // Ganti tulisan GID_SHEET_2_BRO dengan angka gid dari Sheet 2 Bro
+        const sheetUrl = 'https://docs.google.com/spreadsheets/d/1gvuoz0dK6e98z4HBjlMFLop1ePmVh372glyliPud3qs/export?format=csv&gid=GID_SHEET_2_BRO'; 
+
+        // Target Kolom 4 (Kolom D) -> Indexnya adalah 3
+        const targetKolom = 3; 
+
+        // Deteksi Error Player
+        player.on('error', function() { errorOverlay.style.display = 'flex'; });
+        player.on('loadstart', function() { errorOverlay.style.display = 'none'; });
+
+        // TAHAP 1: Ambil data khusus dari Sheet 2, tembak langsung ke Kolom 4
+        fetch(sheetUrl).then(res => res.text()).then(csv => {
+            const rows = csv.split('\n');
+            let urlPlaylist = "";
+
+            // Pencarian hanya fokus di Kolom 4 (D) biar gak ribet dan cepat
+            for(let i = 0; i < rows.length; i++) {
+                // Bersihkan tanda kutip ganda kalau ada
+                const cleanRow = rows[i].replace(/"/g, ''); 
+                const cols = cleanRow.split(',');
+                
+                // Pastikan baris tersebut punya data sampai kolom ke-4
+                if(cols.length > targetKolom) {
+                    const cell = cols[targetKolom].trim();
+                    
+                    // Cek apakah isinya link m3u
+                    if(cell.toLowerCase().includes('http') && (cell.toLowerCase().includes('.m3u') || cell.toLowerCase().includes('m3u8') || cell.toLowerCase().includes('github'))) {
+                        urlPlaylist = cell;
+                        break; 
+                    }
+                }
+            }
+
+            if(urlPlaylist !== "") {
+                loadM3U(urlPlaylist); // Jika ketemu, lanjut ke Tahap 2
+            } else {
+                document.getElementById('list').innerHTML = '<div style="grid-column: span 4; text-align: center; color: red; font-size: 12px; padding: 20px;">Gagal menemukan link M3U di Sheet 2 Kolom 4 (D).<br>Pastikan Bro sudah menaruh link yang benar.</div>';
+            }
+        }).catch(err => {
+            document.getElementById('list').innerHTML = '<div style="grid-column: span 4; text-align: center; color: red; font-size: 12px; padding: 20px;">Gagal terhubung ke Google Sheet.<br>Pastikan status share-nya sudah "Siapa saja yang memiliki link".</div>';
+        });
+
+        // TAHAP 2: Buka isi file M3U dan jadikan kotak-kotak 4 kolom
+        function loadM3U(m3uUrl) {
+            fetch(m3uUrl).then(res => res.text()).then(data => {
+                const lines = data.split('\n');
+                let currentLogo = "";
+                document.getElementById('list').innerHTML = ''; // Bersihkan tulisan loading
+
+                lines.forEach((line, i) => {
+                    if(line.startsWith('#EXTINF')) {
+                        const logoMatch = line.match(/tvg-logo="([^"]+)"/);
+                        currentLogo = logoMatch ? logoMatch[1] : "";
+                        
+                        const nameParts = line.split(',');
+                        const name = nameParts[nameParts.length - 1];
+                        const link = lines[i+1];
+                        
+                        if(!link || link.toLowerCase().includes('http') == false) return;
+
+                        const div = document.createElement('div');
+                        div.className = 'channel-item';
+                        
+                        div.innerHTML = `
+                            <div class="channel-icon">
+                                ${currentLogo ? `<img src="${currentLogo}" onerror="this.style.display='none'">` : 'TV'}
+                            </div>
+                            <div class="channel-name">${name}</div>
+                        `;
+
+                        div.onclick = () => {
+                            document.querySelectorAll('.channel-item').forEach(b => b.classList.remove('active'));
+                            div.classList.add('active');
+                            
+                            document.getElementById('playing-name').innerText = name;
+                            currentLink = link;
+
+                            // Reset Player dan Play
+                            player.src({ src: link, type: 'application/x-mpegURL' });
+                            player.play();
+                        };
+                        document.getElementById('list').appendChild(div);
+                    }
+                });
+            });
+        }
+
+        // FUNGSI LEMPAR KE TELEVIZO
+        function playExternal() {
+            if(currentLink === "") {
+                alert("Pilih channel dari daftar dulu, Bro!");
+                return;
+            }
+            const isHttps = currentLink.startsWith("https");
+            const cleanLink = currentLink.replace(/^https?:\/\//i, "");
+            const scheme = isHttps ? "https" : "http";
+            
+            window.location.href = `intent://${cleanLink}#Intent;scheme=${scheme};package=com.ott.televizo;end`;
+        }
+    </script>
