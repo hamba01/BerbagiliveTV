@@ -1,108 +1,557 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+<title>Beranda Streaming TV & IPTV</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link href="https://vjs.zencdn.net/8.10.0/video-js.css" rel="stylesheet" />
+
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+body { background-color: #121212; color: #ffffff; padding-bottom: 90px; overflow-x: hidden; width: 100%; }
+
+.main-container { width: 100%; margin: 0; padding: 0; }
+header { padding: 15px; background: #1f1f1f; display: flex; flex-direction: column; gap: 10px; position: sticky; top: 0; z-index: 100; border-bottom: 1px solid #2a2a2a; }
+.logo-area { display: flex; justify-content: space-between; align-items: center; width: 100%; }
+.logo-area h1 { font-size: 20px; color: #FFCC00; font-weight: bold; }
+.logo-nav-links { display: flex; gap: 15px; align-items: center; }
+.logo-nav-links a { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: #ffffff; }
+.logo-nav-links a i { font-size: 18px; }
+.logo-nav-links a span { font-size: 10px; margin-top: 2px; }
+
+.search-bar { display: flex; background: #2a2a2a; padding: 8px 12px; border-radius: 8px; align-items: center; }
+.search-bar input { background: none; border: none; color: white; width: 100%; margin-left: 10px; outline: none; }
+
+.hero-banner { margin: 15px; min-height: 220px; background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.9)), url('https://i.ibb.co.com/QFYR5JLX/1782035887565.png') center/cover; border-radius: 12px; display: flex; flex-direction: column; justify-content: flex-end; padding: 15px; border-left: 5px solid #2ecc71; transition: 0.2s; cursor: pointer; }
+.hero-banner span.live-tag { background: #2ecc71; color: #ffffff; width: max-content; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; margin-bottom: 5px; text-transform: uppercase; }
+.hero-banner h2 { font-size: 20px; margin-bottom: 2px; color: #FFCC00; text-shadow: 1px 1px 3px rgba(0,0,0,0.9); }
+.hero-banner p { font-size: 13px; color: #ccc; margin-bottom: 8px; }
+.jam-digital { font-size: 14px; color: #fff; font-weight: bold; margin: 5px 0; }
+.countdown-container { display: flex; gap: 5px; font-size: 12px; font-weight: bold; color: #FFCC00; background: rgba(0,0,0,0.6); padding: 5px 10px; border-radius: 6px; width: max-content; transition: 0.3s; }
+.live-now-style { background: #e50914 !important; color: #ffffff !important; animation: blinkText 1s infinite; }
+
+.section-header { display: flex; justify-content: space-between; align-items: center; padding: 15px 15px 10px 15px; }
+.section-header .title { color: #FFFFFF; font-weight: bold; font-size: 16px; }
+.section-header .live-more { color: #FFCC00; font-size: 13px; text-decoration: none; font-weight: bold; display: flex; align-items: center; }
+.blinking-dot { width: 12px; height: 12px; background-color: #FF2A2A; border-radius: 50%; display: inline-block; margin-right: 8px; animation: pulse-glow-dot 1.5s infinite ease-in-out; }
+.live-dot { width: 8px; height: 8px; background: #ffffff; border-radius: 50%; display: inline-block; margin-right: 4px; animation: blinkDot 1.5s infinite; }
+
+/* TAMPILAN PEMUTAR VIDEO (DARI HTML 1) */
+#video-container-box { display: none; position: relative; margin: 0 15px 20px 15px; border-radius: 10px; overflow: hidden; border: 2px solid #FFCC00; box-shadow: 0 4px 15px rgba(255,204,0,0.2); }
+
+/* --- TAMPILAN IPTV (DARI HTML 2) --- */
+.kategori-container { display: flex; overflow-x: auto; gap: 10px; padding: 12px 15px; background: #121212; border-bottom: 1px solid #1f1f1f; width: 100%; margin-bottom: 10px; }
+.kategori-container::-webkit-scrollbar { display: none; }
+.btn-kategori { background: #1f1f1f; color: #aaa; border: 1px solid #2a2a2a; padding: 8px 16px; border-radius: 20px; font-size: 12px; cursor: pointer; white-space: nowrap; transition: all 0.2s ease; flex-shrink: 0; }
+.btn-kategori.aktif { background: linear-gradient(135deg, #FFCC00, #FFAA00); color: #000; font-weight: bold; border-color: #FFCC00; box-shadow: 0 2px 8px rgba(255, 204, 0, 0.4); }
+
+.menu-mengambang { position: -webkit-sticky !important; position: sticky !important; top: 70px !important; z-index: 90; box-shadow: 0px 8px 10px -5px rgba(0,0,0,0.8) !important; }
+
+.tv-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; padding: 0 15px; margin-bottom: 25px; width: 100%; }
+.tv-card { background: linear-gradient(145deg, #1e1e1e, #161616); border-radius: 12px; border: 1px solid #282828; padding: 12px 6px; text-align: center; cursor: pointer; text-decoration: none; display: flex; flex-direction: column; justify-content: center; align-items: center; min-width: 0; transition: all 0.2s ease; box-shadow: 0 4px 6px rgba(0,0,0,0.3); aspect-ratio: auto; }
+.tv-card.aktif { border-color: #FFCC00; background: linear-gradient(145deg, #252525, #1e1e1e); box-shadow: 0 0 12px rgba(255, 204, 0, 0.3); transform: translateY(-2px); }
+.tv-card:active { transform: scale(0.90); }
+.icon-wrapper { width: 100%; height: 42px; margin-bottom: 8px; display: flex; justify-content: center; align-items: center; }
+.tv-card img { max-width: 90%; max-height: 100%; object-fit: contain; filter: drop-shadow(0px 2px 4px rgba(0,0,0,0.5)); }
+.fallback-text { font-size: 18px; font-weight: bold; color: #fff; background: linear-gradient(135deg, #444, #222); width: 38px; height: 38px; line-height: 38px; border-radius: 50%; display: none; text-align: center; border: 1px solid #555; }
+.tv-card p { font-size: 10px; color: #e0e0e0; font-weight: 500; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; }
+
+.skeleton { background: linear-gradient(90deg, #1f1f1f 25%, #2a2a2a 50%, #1f1f1f 75%); background-size: 200% 100%; border-radius: 12px; border: 1px solid #282828; height: 82px; animation: loadingShimmer 1.5s infinite linear; }
+@keyframes loadingShimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+#pesan-status { text-align: center; padding: 20px 15px; color: #FFCC00; font-size: 13px; width: 100%; font-weight: bold; }
+/* -------------------------------------- */
+
+.embed-container { margin: 5px 15px 15px 15px; border-radius: 10px; overflow: hidden; border: 1px solid #2a2a2a; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+.embed-container iframe { display: block; width: 100%; height: 400px; border: none; }
+.embed-header { background: #1f1f1f; display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; border-bottom: 1px solid #2a2a2a; }
+.embed-header span.title { font-size: 14px; font-weight: bold; color: #fff; }
+.embed-header span.tag { font-size: 9px; background: #2ecc71; color: #fff; padding: 2px 6px; border-radius: 4px; font-weight: bold; }
+
+.action-buttons { display: flex; gap: 12px; padding: 0 15px; margin: 20px 0 15px 0; justify-content: space-between; align-items: stretch; }
+.action-buttons a { flex: 1; display: flex; text-decoration: none; }
+.btn-custom { width: 100%; background: #1f1f1f; color: #FFCC00; border: 1.5px solid #FFCC00; padding: 14px 10px; border-radius: 8px; text-align: center; font-weight: bold; font-size: 13px; display: flex; align-items: center; justify-content: center; gap: 8px; transition: background 0.1s, color 0.1s; }
+.btn-custom:active { background: #FFCC00; color: #121212; }
+
+.marquee-container { margin: 5px 15px 15px 15px; background: #FFCC00; padding: 12px; border-radius: 8px; overflow: hidden; white-space: nowrap; box-shadow: 0 4px 12px rgba(255,204,0,0.2); }
+.marquee-container marquee { color: #121212; font-size: 14px; font-weight: bold; }
+
+.server-status { text-align: center; font-size: 11px; font-weight: bold; color: #aaaaaa; padding: 12px 0; }
+
+.image-banner-container { margin: 15px !important; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.4); border: 1px solid #2a2a2a; cursor: pointer; }
+.image-banner-responsive { width: 100%; height: auto; display: block; object-fit: cover; }
+
+.promo-container-footer { display: flex; flex-direction: column; gap: 12px; margin: 0 15px 15px 15px; }
+.promo-box-footer { flex: 1; display: flex; flex-direction: column; justify-content: space-between; background: linear-gradient(135deg, #1f1f1f 0%, #252525 100%); border: 1.5px solid #ffcc00; border-radius: 8px; padding: 14px; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.4); transition: transform 0.2s; }
+.promo-box-footer:active { transform: scale(0.98); }
+.promo-ads-space { border: 1.5px dashed #ffcc00; }
+.promo-header-flex { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; }
+.promo-icon-yellow { font-size: 14px; color: #ffcc00; }
+.promo-box-footer h4 { font-size: 13px; font-weight: 800; color: #ffcc00; }
+.promo-desc-mini { font-size: 12px; color: #dddddd; line-height: 1.4; margin-bottom: 6px; flex-grow: 1; }
+.promo-click-mini { font-size: 11px; color: #aaaaaa; font-weight: bold; display: flex; align-items: center; gap: 3px; animation: pulseTextMini 2s infinite; }
+
+.nav-bar { position: fixed; bottom: 0; left: 0; width: 100%; background: #1f1f1f; display: flex; justify-content: space-around; padding: 12px 0; border-top: 1px solid #2a2a2a; z-index: 100; align-items: center; }
+.nav-item { text-align: center; color: #888; font-size: 11px; text-decoration: none; flex: 1; cursor: pointer; background: none; border: none; outline: none; transition: color 0.1s; }
+.nav-item i { font-size: 20px; margin-bottom: 4px; display: block; }
+.nav-item.active { color: #FFCC00; }
+.nav-refresh-center { color: #888; }
+.nav-refresh-center:active { color: #FFCC00 !important; }
+.refreshing-spin { animation: putarCepat 0.5s linear infinite !important; }
+
+@keyframes blinkDot { 0% {opacity: 0.3;} 50% {opacity: 1;} 100% {opacity: 0.3;} }
+@keyframes blinkText { 0% {opacity: 0.7;} 50% {opacity: 1;} 100% {opacity: 0.7;} }
+@keyframes pulseTextMini { 0% { opacity: 0.6; } 50% { opacity: 1; color: #ffffff; } 100% { opacity: 0.6; } }
+@keyframes pulse-glow-dot { 0% { transform: scale(0.9); opacity: 0.6; box-shadow: 0 0 4px 1px rgba(255, 42, 42, 0.5); } 50% { transform: scale(1.2); opacity: 1; box-shadow: 0 0 16px 6px rgba(255, 42, 42, 0.9); } 100% { transform: scale(0.9); opacity: 0.6; box-shadow: 0 0 4px 1px rgba(255, 42, 42, 0.5); } }
+@keyframes putarCepat { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+/* CUSTOM VIDEO.JS KUNING */
+.video-js .vjs-big-play-button { background-color: rgba(255, 204, 0, 0.8) !important; border: none !important; border-radius: 50% !important; width: 60px !important; height: 60px !important; line-height: 60px !important; margin-left: -30px !important; margin-top: -30px !important; }
+.video-js .vjs-control-bar { background-color: rgba(31, 31, 31, 0.9) !important; }
+.video-js .vjs-play-progress { background-color: #FFCC00 !important; }
+.video-js .vjs-loading-spinner { background: none !important; }
+.video-js .vjs-loading-spinner:after { display: none !important; }
+.video-js.vjs-waiting .vjs-loading-spinner:before, .video-js.vjs-seeking .vjs-loading-spinner:before { content: "" !important; display: block !important; position: absolute !important; top: 50% !important; left: 50% !important; width: 60px !important; height: 60px !important; margin: -30px 0 0 -30px !important; border: 6px solid rgba(255, 204, 0, 0.2) !important; border-top-color: #FFCC00 !important; border-radius: 50% !important; animation: puter-kuning 0.8s linear infinite !important; visibility: visible !important; opacity: 1 !important; border-bottom-color: rgba(255, 204, 0, 0.2) !important; border-left-color: rgba(255, 204, 0, 0.2) !important; border-right-color: rgba(255, 204, 0, 0.2) !important; }
+@keyframes puter-kuning { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+@media (min-width: 600px) { .tv-grid { grid-template-columns: repeat(6, 1fr); } .promo-container-footer { flex-direction: row; } }
+@media (min-width: 992px) {
+    header { flex-direction: row; justify-content: space-between; align-items: center; padding: 15px 30px; }
+    .search-bar { width: 400px; }
+    .hero-banner { height: 320px; padding: 30px; margin: 20px 30px; }
+    .hero-banner h2 { font-size: 28px; }
+    .tv-grid { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 20px; padding: 0 30px; margin-bottom: 30px; }
+    .section-header, .kategori-container { padding: 20px 30px 10px 30px; }
+    .embed-container, .action-buttons, .marquee-container, .promo-container-footer, .image-banner-container, #video-container-box { margin-left: 30px !important; margin-right: 30px !important; }
+    .nav-bar { max-width: 600px; left: 50%; transform: translateX(-50%); border-radius: 20px 20px 0 0; }
+}
+</style>
+</head>
+<body>
+
+<div class="main-container">
+    <header>
+        <div class="logo-area">
+            <h1>Berbagi Live<span style="color:#fff">TV</span></h1>
+            <div class="logo-nav-links">
+                <a href="https://radioonline.co.id/" target="_blank"><i class="fa-solid fa-radio"></i><span>Radio</span></a>
+                <a href="go:S004"><i class="fa-solid fa-calendar-days"></i><span>Jadwal</span></a>
+            </div>
+        </div>
+        <div class="search-bar">
+            <i class="fa-solid fa-magnifying-glass" style="color: #888;"></i>
+            <input type="text" id="inputCari" placeholder="Cari saluran TV favoritmu..." onkeyup="cariSaluran()">
+        </div>
+    </header>
+
+    <div id="main-banner" class="hero-banner" style="position: relative; cursor: pointer;">
+        <div style="position: absolute; right: 20px; top: 50%; transform: translateY(-50%); width: 45px; height: 45px; border: 1.5px solid rgba(255,255,255,0.7); border-radius: 50%; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.2);">
+            <i class="fa-solid fa-play" style="color: rgba(255,255,255,0.9); font-size: 16px; margin-left: 3px;"></i>
+        </div>
+        <span class="live-tag"><span class="live-dot"></span>Matchday</span>
+        <h2 id="banner-title">Memuat Event...</h2>
+        <p id="match-status" style="background: #2ecc71; color: #ffffff; width: max-content; padding: 4px 10px; border-radius: 4px; font-weight: bold; font-size: 13px; margin-bottom: 10px; text-shadow: none;">Memuat Pertandingan...</p>
+        <div id="jam-digital" class="jam-digital"></div>
+        <div style="display: flex; align-items: center; gap: 6px; margin-top: 0px; margin-bottom: 8px; justify-content: flex-start; width: 100%;">
+            <i class="fa-solid fa-futbol" style="color: #ffffff; font-size: 14px;"></i>
+            <span style="color: #FFD700; font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px;">
+                Kick Off Dimulai:
+            </span>
+        </div>
+        <div class="countdown-container" id="countdown" style="color: #ffffff;">Memuat hitung mundur...</div>
+    </div>
+
+    <div id="video-container-box">
+        <div style="background: #1f1f1f; padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #2a2a2a; position: relative; z-index: 15;">
+            <span id="playing-title" style="font-size: 14px; font-weight: bold; color: #FFCC00; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 50%;"><i class="fa-solid fa-tv"></i> Siaran</span>
+            <div style="display: flex; gap: 8px;">
+                <a id="btn-external-player" href="#" style="background: #2ecc71; color: white; text-decoration: none; padding: 6px 10px; border-radius: 4px; font-size: 11px; font-weight: bold; display: flex; align-items: center; gap: 4px;">
+                    <i class="fa-solid fa-external-link-alt"></i> Bawaan HP
+                </a>
+                <button onclick="tutupPlayer()" style="background: #e50914; color: white; border: none; padding: 6px 10px; border-radius: 4px; font-size: 11px; font-weight: bold; cursor: pointer;">
+                    Tutup
+                </button>
+            </div>
+        </div>
+
+        <div id="player-error-overlay" style="display: none; position: absolute; top: 45px; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); z-index: 10; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px;">
+            <i class="fa-solid fa-triangle-exclamation" style="font-size: 30px; color: #FFCC00; margin-bottom: 10px;"></i>
+            <p style="font-size: 13px; color: #fff; font-weight: bold; margin-bottom: 5px;">Server Stasiun TV Gangguan</p>
+            <p style="font-size: 11px; color: #aaa;">Coba channel lain atau klik tombol hijau <b>Bawaan HP</b> di atas 👆</p>
+        </div>
+
+        <video id="my-tv-player" class="video-js vjs-default-skin vjs-fluid vjs-big-play-centered" controls preload="auto" data-setup='{}'></video>
+    </div>
+
+    <div class="section-header">
+        <span class="title">Saluran TV & IPTV</span>
+        <a href="go:S002" class="live-more"><span class="blinking-dot"></span>Live Lainnya 👈</a>
+    </div>
+
+    <div class="kategori-container menu-mengambang" id="kategori-list"></div>
+    <div id="pesan-status" style="display: none;"></div>
+    <div class="tv-grid" id="channel-list"></div>
+    <div class="embed-container">
+        <div class="embed-header">
+            <span class="title"><i class="fa-solid fa-futbol" style="color: #FFCC00; margin-right: 5px;"></i> Cuplikan Gol</span>
+            <span class="tag">Auto-Update</span>
+        </div>
+        <iframe src="https://www.scorebat.com/embed/" allowfullscreen></iframe>
+    </div>
+
+    <div class="action-buttons">
+        <a href="go:S123"><div class="btn-custom"><i class="fa-solid fa-music"></i> Playlist Musik</div></a>
+        <a href="https://saweria.co/BerbagiLiveTv" target="_blank"><div class="btn-custom"><i class="fa-solid fa-heart-circle-bolt"></i> Dukung / Saweria</div></a>
+    </div>
+
+    <div class="marquee-container">
+        <marquee id="teks-berjalan-beranda" scrollamount="4">Memuat pengumuman...</marquee>
+    </div>
+
+    <div class="server-status">
+        <span style="color: #00ff00;">●</span> SERVER STATUS: ONLINE (v1.0)
+    </div>
+
+    <div class="image-banner-container" onclick="window.location.href='https://s.shopee.co.id/8pjib0pveg'">
+        <img src="https://i.ibb.co.com/0jd21zLN/1782481309922.png" alt="Promo Banner" class="image-banner-responsive">
+    </div>
+
+    <div class="promo-container-footer">
+        <div class="promo-box-footer" onclick="window.location.href='https://wa.me/6289618009202'">
+            <div class="promo-header-flex"><i class="fa-solid fa-screwdriver-wrench promo-icon-yellow"></i><h4>ORAK OREK87 SERVICE</h4></div>
+            <p class="promo-desc-mini">Spesialis restorasi & servis gadget portable (PSP, TWS, dll).</p>
+            <p class="promo-click-mini"><i class="fa-solid fa-hand-pointer"></i> Klik untuk info</p>
+        </div>
+        <div class="promo-box-footer promo-ads-space" onclick="window.location.href='https://wa.me/628xxxxxxxxxx'">
+            <div class="promo-header-flex"><i class="fa-solid fa-rectangle-ad promo-icon-yellow"></i><h4>PASANG IKLAN DISINI</h4></div>
+            <p class="promo-desc-mini">Mau usaha atau tokomu dipromosikan di aplikasi ini?</p>
+            <p class="promo-click-mini"><i class="fa-solid fa-bullhorn"></i> Hubungi Admin</p>
+        </div>
+    </div>
+</div>
+
+<div class="nav-bar" id="bottomNavBar">
+    <a href="#" class="nav-item active" onclick="setActiveNav(this)"><i class="fa-solid fa-house"></i> Beranda</a>
+    <a href="go:S007" class="nav-item" onclick="setActiveNav(this)"><i class="fa-solid fa-tv"></i> Kategori</a>
+    <button class="nav-item nav-refresh-center" onclick="pemicuPenyegaranData()"><i class="fa-solid fa-rotate-right" id="refresh-icon"></i><span>Refresh</span></button>
+    <a href="go:S444" class="nav-item" onclick="setActiveNav(this)"><i class="fa-solid fa-comments"></i> Live Chat</a>
+    <a href="go:S003" class="nav-item" onclick="setActiveNav(this)"><i class="fa-solid fa-clapperboard"></i> Movie</a>
+</div>
+
+<script src="https://vjs.zencdn.net/8.10.0/video.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/videojs-youtube/3.0.1/Youtube.min.js"></script>
+
 <script>
-        const player = videojs('my-video');
-        let currentLink = ""; 
-        const errorOverlay = document.getElementById('error-overlay');
+    const SPREADSHEET_ID = '1gvuoz0dK6e98z4HBjlMFLop1ePmVh372glyliPud3qs';
+    const URL_BANNER = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json&sheet=Sheet1`;
+    
+    let waktuTargetKickOff = null; 
+    let playerVideoJS = null; 
+    let timeoutBeban = null; 
+    let databaseChannel = {};
 
-        // PENGATURAN GOOGLE SHEET KHUSUS SHEET 2
-        // Ganti tulisan GID_SHEET_2_BRO dengan angka gid dari Sheet 2 Bro
-        const sheetUrl = 'https://docs.google.com/spreadsheets/d/1gvuoz0dK6e98z4HBjlMFLop1ePmVh372glyliPud3qs/export?format=csv&gid=GID_SHEET_2_BRO'; 
+    function pemicuPenyegaranData() {
+        var ikon = document.getElementById('refresh-icon');
+        if (ikon) ikon.classList.add('refreshing-spin');
+        muatBanner(); bacaGoogleSheet(); tampilkanJam();
+        setTimeout(function() { if (ikon) ikon.classList.remove('refreshing-spin'); }, 800);
+    }
 
-        // Target Kolom 4 (Kolom D) -> Indexnya adalah 3
-        const targetKolom = 3; 
+    function setActiveNav(element) {
+        var navItems = document.querySelectorAll('.nav-item');
+        navItems.forEach(function(item) { item.classList.remove('active'); });
+        element.classList.add('active');
+    }
 
-        // Deteksi Error Player
-        player.on('error', function() { errorOverlay.style.display = 'flex'; });
-        player.on('loadstart', function() { errorOverlay.style.display = 'none'; });
+    function tampilkanJam() {
+        var w = new Date();
+        var hari = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
+        var bulan = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
+        var tgl = hari[w.getDay()] + ", " + w.getDate() + " " + bulan[w.getMonth()] + " " + w.getFullYear();
+        var jam = String(w.getHours()).padStart(2, '0');
+        var menit = String(w.getMinutes()).padStart(2, '0');
+        var detik = String(w.getSeconds()).padStart(2, '0');
+        var targetJam = document.getElementById('jam-digital');
+        if (targetJam) targetJam.innerText = tgl + " | " + jam + "." + menit + "." + detik;
+    }
 
-        // TAHAP 1: Ambil data khusus dari Sheet 2, tembak langsung ke Kolom 4
-        fetch(sheetUrl).then(res => res.text()).then(csv => {
-            const rows = csv.split('\n');
-            let urlPlaylist = "";
+    // FUNGSI PEMUTAR UTAMA (DARI HTML 1)
+    function jalankanPlayerWeb(linkStreaming, namaSiaran) {
+        const wadahPlayer = document.getElementById('video-container-box');
+        const overlayError = document.getElementById('player-error-overlay');
+        
+        wadahPlayer.style.display = 'block';
+        overlayError.style.display = 'none'; 
+        
+        document.getElementById('playing-title').innerHTML = `<i class="fa-solid fa-tower-broadcast blinking-dot" style="margin-right:5px; background:none;"></i> ${namaSiaran}`;
+        
+        // Buat Intent Link Eksternal seperti di HTML 2
+        let linkIntent = "intent://" + linkStreaming.replace(/^https?:\/\//i, '') + "#Intent;scheme=" + (linkStreaming.startsWith('https') ? 'https' : 'http') + ";type=video/*;action=android.intent.action.VIEW;end;";
+        document.getElementById('btn-external-player').href = linkIntent;
 
-            // Pencarian hanya fokus di Kolom 4 (D) biar gak ribet dan cepat
-            for(let i = 0; i < rows.length; i++) {
-                // Bersihkan tanda kutip ganda kalau ada
-                const cleanRow = rows[i].replace(/"/g, ''); 
-                const cols = cleanRow.split(',');
+        if (!playerVideoJS) { 
+            playerVideoJS = videojs('my-tv-player', { 
+                techOrder: ['html5'],
+                controlBar: { pictureInPictureToggle: true }
+            }); 
+            
+            playerVideoJS.on('error', function() { overlayError.style.display = 'flex'; });
+            playerVideoJS.on('waiting', function() {
+                clearTimeout(timeoutBeban);
+                timeoutBeban = setTimeout(function() { overlayError.style.display = 'flex'; }, 10000); 
+            });
+            playerVideoJS.on('playing', function() {
+                clearTimeout(timeoutBeban);
+                overlayError.style.display = 'none';
+            });
+        } else {
+            clearTimeout(timeoutBeban);
+            playerVideoJS.error(null); 
+        }
+        
+        let tipeVideo = 'application/x-mpegURL'; 
+        if (linkStreaming.toLowerCase().includes('.mpd')) {
+            tipeVideo = 'application/dash+xml';  
+        } else if (linkStreaming.includes('youtube.com') || linkStreaming.includes('youtu.be')) {
+            tipeVideo = 'video/youtube';
+        }
+
+        playerVideoJS.src({ src: linkStreaming, type: tipeVideo });
+        playerVideoJS.play();
+        wadahPlayer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    function tutupPlayer() {
+        if(playerVideoJS) { playerVideoJS.pause(); }
+        document.getElementById('video-container-box').style.display = 'none';
+        document.getElementById('player-error-overlay').style.display = 'none';
+        clearTimeout(timeoutBeban);
+    }
+     
+    function muatBanner() {
+        fetch(URL_BANNER + "&_t=" + new Date().getTime()).then(response => response.text()).then(data => {
+            const jsonText = data.match(/google\.visualization\.Query\.setResponse\(([\s\S\u2028\u2029]*)\);/)[1];
+            const jsonObj = JSON.parse(jsonText);
+            const rowData = jsonObj.table.rows[0].c; 
+            if(rowData) {
+                if(rowData[0] && rowData[0].v) document.getElementById('banner-title').innerText = rowData[0].v;
+                if(rowData[1] && rowData[1].v) document.getElementById('match-status').innerText = rowData[1].v;
+                if(rowData[3] && rowData[3].v) document.getElementById('teks-berjalan-beranda').innerText = rowData[3].v;
                 
-                // Pastikan baris tersebut punya data sampai kolom ke-4
-                if(cols.length > targetKolom) {
-                    const cell = cols[targetKolom].trim();
-                    
-                    // Cek apakah isinya link m3u
-                    if(cell.toLowerCase().includes('http') && (cell.toLowerCase().includes('.m3u') || cell.toLowerCase().includes('m3u8') || cell.toLowerCase().includes('github'))) {
-                        urlPlaylist = cell;
-                        break; 
-                    }
+                if(rowData[4] && rowData[4].v) {
+                    let urlStreaming = rowData[4].v.trim();
+                    let judulBanner = (rowData[0] && rowData[0].v) ? rowData[0].v : "Live Event";
+                    document.getElementById('main-banner').onclick = function() { 
+                       jalankanPlayerWeb(urlStreaming, judulBanner); 
+                    };
+                }
+
+                if(rowData[2] && rowData[2].f) {
+                    waktuTargetKickOff = new Date(rowData[2].f.replace(/-/g, "/")).getTime();
+                } else if (rowData[2] && rowData[2].v) {
+                    waktuTargetKickOff = new Date(rowData[2].v).getTime();
                 }
             }
+        }).catch(err => console.error('Error Banner:', err));
+    }
 
-            if(urlPlaylist !== "") {
-                loadM3U(urlPlaylist); // Jika ketemu, lanjut ke Tahap 2
-            } else {
-                document.getElementById('list').innerHTML = '<div style="grid-column: span 4; text-align: center; color: red; font-size: 12px; padding: 20px;">Gagal menemukan link M3U di Sheet 2 Kolom 4 (D).<br>Pastikan Bro sudah menaruh link yang benar.</div>';
-            }
-        }).catch(err => {
-            document.getElementById('list').innerHTML = '<div style="grid-column: span 4; text-align: center; color: red; font-size: 12px; padding: 20px;">Gagal terhubung ke Google Sheet.<br>Pastikan status share-nya sudah "Siapa saja yang memiliki link".</div>';
-        });
-
-        // TAHAP 2: Buka isi file M3U dan jadikan kotak-kotak 4 kolom
-        function loadM3U(m3uUrl) {
-            fetch(m3uUrl).then(res => res.text()).then(data => {
-                const lines = data.split('\n');
-                let currentLogo = "";
-                document.getElementById('list').innerHTML = ''; // Bersihkan tulisan loading
-
-                lines.forEach((line, i) => {
-                    if(line.startsWith('#EXTINF')) {
-                        const logoMatch = line.match(/tvg-logo="([^"]+)"/);
-                        currentLogo = logoMatch ? logoMatch[1] : "";
-                        
-                        const nameParts = line.split(',');
-                        const name = nameParts[nameParts.length - 1];
-                        const link = lines[i+1];
-                        
-                        if(!link || link.toLowerCase().includes('http') == false) return;
-
-                        const div = document.createElement('div');
-                        div.className = 'channel-item';
-                        
-                        div.innerHTML = `
-                            <div class="channel-icon">
-                                ${currentLogo ? `<img src="${currentLogo}" onerror="this.style.display='none'">` : 'TV'}
-                            </div>
-                            <div class="channel-name">${name}</div>
-                        `;
-
-                        div.onclick = () => {
-                            document.querySelectorAll('.channel-item').forEach(b => b.classList.remove('active'));
-                            div.classList.add('active');
-                            
-                            document.getElementById('playing-name').innerText = name;
-                            currentLink = link;
-
-                            // Reset Player dan Play
-                            player.src({ src: link, type: 'application/x-mpegURL' });
-                            player.play();
-                        };
-                        document.getElementById('list').appendChild(div);
-                    }
-                });
-            });
+    function hitungMundurPertandingan() {
+        if (!waktuTargetKickOff || isNaN(waktuTargetKickOff)) return;
+        const selisih = waktuTargetKickOff - new Date().getTime(); 
+        const wadahCountdown = document.getElementById('countdown');
+        if (selisih < 0) {
+            wadahCountdown.innerText = "👉LIVE NOW KLIK HERE👈!";
+            wadahCountdown.classList.add('live-now-style');
+        } else {
+            wadahCountdown.classList.remove('live-now-style');
+            const hari = Math.floor(selisih / (1000 * 60 * 60 * 24));
+            const jam = Math.floor((selisih % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const menit = Math.floor((selisih % (1000 * 60 * 60)) / (1000 * 60));
+            const detik = Math.floor((selisih % (1000 * 60)) / 1000);
+            wadahCountdown.innerText = `${hari}h ${jam}j ${menit}m ${detik}s`;
         }
+    }
 
-        // FUNGSI LEMPAR KE TELEVIZO
-        function playExternal() {
-            if(currentLink === "") {
-                alert("Pilih channel dari daftar dulu, Bro!");
+    /* --- FUNGSI M3U IPTV (DARI HTML 2) --- */
+    function tunjukkanSkeleton() {
+        const wadahChan = document.getElementById('channel-list');
+        wadahChan.innerHTML = '<div class="skeleton"></div>'.repeat(8);
+    }
+
+    async function bacaGoogleSheet() {
+        tunjukkanSkeleton();
+        try {
+            // Kita pakai URL_BANNER karena itu adalah Sheet1 tempat link github ditaruh
+            const response = await fetch(URL_BANNER + "&_t=" + new Date().getTime());
+            const text = await response.text();
+            const jsonString = text.match(/google\.visualization\.Query\.setResponse\(([\s\S\u2028\u2029]*)\);/)[1];
+            const dataSheet = JSON.parse(jsonString);
+            
+            let linkM3U = null;
+            const semuaBaris = dataSheet.table.rows;
+
+            for (let r = 0; r < semuaBaris.length; r++) {
+                if (semuaBaris[r].c) {
+                    for (let c = 0; c < semuaBaris[r].c.length; c++) {
+                        let isiSel = semuaBaris[r].c[c];
+                        if (isiSel && isiSel.v && typeof isiSel.v === 'string' && (isiSel.v.includes('gist.githubusercontent.com') || isiSel.v.includes('pastebin.com/raw'))) {
+                            linkM3U = isiSel.v.trim();
+                            break; 
+                        }
+                    }
+                }
+                if (linkM3U) break; 
+            }
+
+            if (linkM3U) {
+                ambilDataM3U(linkM3U); 
+            } else {
+                document.getElementById('channel-list').innerHTML = '';
+                document.getElementById('pesan-status').style.display = 'block';
+                document.getElementById('pesan-status').innerHTML = "Link Data Server tidak ditemukan di Sheet1. Pastikan link GitHub Gist Raw sudah benar!";
+            }
+        } catch (error) {
+            document.getElementById('channel-list').innerHTML = '';
+            document.getElementById('pesan-status').style.display = 'block';
+            document.getElementById('pesan-status').innerHTML = "Gagal terhubung ke Google Sheet. Pastikan akses Publik aktif.";
+        }
+    }
+
+    async function ambilDataM3U(urlM3u) {
+        try {
+            let text = "";
+            try {
+                const response = await fetch(urlM3u);
+                if (!response.ok) throw new Error("Direct fetch failed");
+                text = await response.text();
+            } catch (e1) {
+                try {
+                    const proxyUrl = `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(urlM3u)}`;
+                    const response = await fetch(proxyUrl);
+                    if (!response.ok) throw new Error("Codetabs error");
+                    text = await response.text();
+                } catch (e2) {
+                    const backupProxy = `https://api.allorigins.win/raw?url=${encodeURIComponent(urlM3u)}`;
+                    const response = await fetch(backupProxy);
+                    text = await response.text();
+                }
+            }
+            
+            const baris = text.split('\n');
+            let infoExtinf = '';
+            databaseChannel = {}; 
+            let jumlahChannel = 0;
+
+            for (let i = 0; i < baris.length; i++) {
+                let teks = baris[i].trim();
+                if (teks.startsWith('#EXTINF:')) {
+                    infoExtinf = teks;
+                } else if ((teks.startsWith('http') || teks.startsWith('https')) && infoExtinf !== '') {
+                    
+                    let tangkapGrup = infoExtinf.match(/group-title="([^"]+)"/i);
+                    let namaGrup = tangkapGrup ? tangkapGrup[1].trim() : "LAINNYA";
+                    
+                    let tangkapLogo = infoExtinf.match(/tvg-logo="([^"]+)"/i);
+                    let urlLogo = tangkapLogo ? tangkapLogo[1].trim() : "";
+                    
+                    let pecahKoma = infoExtinf.split(',');
+                    let namaChannel = pecahKoma.length > 1 ? pecahKoma[pecahKoma.length - 1].trim() : "Siaran TV";
+
+                    if (!databaseChannel[namaGrup]) { databaseChannel[namaGrup] = []; }
+                    databaseChannel[namaGrup].push({ nama: namaChannel, logo: urlLogo, url: teks });
+                    
+                    jumlahChannel++;
+                    infoExtinf = '';
+                }
+            }
+            
+            if (jumlahChannel === 0) {
+                document.getElementById('channel-list').innerHTML = '';
+                document.getElementById('pesan-status').style.display = 'block';
+                document.getElementById('pesan-status').innerHTML = "Data berhasil dibuka, tapi kosong/tidak ada format #EXTINF.";
                 return;
             }
-            const isHttps = currentLink.startsWith("https");
-            const cleanLink = currentLink.replace(/^https?:\/\//i, "");
-            const scheme = isHttps ? "https" : "http";
-            
-            window.location.href = `intent://${cleanLink}#Intent;scheme=${scheme};package=com.ott.televizo;end`;
+            document.getElementById('pesan-status').style.display = 'none';
+            renderKategori();
+
+        } catch (error) {
+            document.getElementById('channel-list').innerHTML = '';
+            document.getElementById('pesan-status').style.display = 'block';
+            document.getElementById('pesan-status').innerHTML = "Gagal memuat saluran. Coba refresh atau periksa koneksi.";
         }
-   </script>     
-   </body>
+    }
+
+    function renderKategori() {
+        const wadahKat = document.getElementById('kategori-list');
+        wadahKat.innerHTML = '';
+        const daftarGrup = Object.keys(databaseChannel).sort();
+        
+        if(daftarGrup.length === 0) return;
+
+        daftarGrup.forEach((grup, urutan) => {
+            let btn = document.createElement('button');
+            btn.className = 'btn-kategori';
+            if(urutan === 0) btn.classList.add('aktif');
+            btn.innerText = grup;
+            btn.onclick = function() {
+                document.querySelectorAll('.btn-kategori').forEach(b => b.classList.remove('aktif'));
+                this.classList.add('aktif');
+                renderChannel(grup);
+            };
+            wadahKat.appendChild(btn);
+        });
+        renderChannel(daftarGrup[0]);
+    }
+
+    function renderChannel(namaGrup) {
+        const wadahChan = document.getElementById('channel-list');
+        wadahChan.innerHTML = '';
+        
+        const listChan = databaseChannel[namaGrup] || [];
+        listChan.forEach(ch => {
+            let card = document.createElement('a');
+            card.className = 'tv-card';
+            card.href = "#";
+            card.setAttribute('data-name', ch.nama);
+            
+            const inisial = ch.nama.charAt(0).toUpperCase();
+            card.innerHTML = `
+                <div class="icon-wrapper">
+                    <img src="${ch.logo}" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                    <div class="fallback-text">${inisial}</div>
+                </div>
+                <p>${ch.nama}</p>
+            `;
+            
+            card.onclick = function(e) {
+                e.preventDefault();
+                document.querySelectorAll('.tv-card').forEach(b => b.classList.remove('aktif'));
+                this.classList.add('aktif');
+                // Panggil pemutar video utama dari HTML 1
+                jalankanPlayerWeb(ch.url, ch.nama);
+            };
+            wadahChan.appendChild(card);
+        });
+        cariSaluran(); // Terapkan filter pencarian jika ada yang sedang diketik
+    }
+
+    function cariSaluran() {
+        let input = document.getElementById('inputCari').value.toLowerCase();
+        let kartuTv = document.getElementsByClassName('tv-card');
+        for (let i = 0; i < kartuTv.length; i++) {
+            let namaTv = kartuTv[i].getAttribute('data-name');
+            kartuTv[i].style.display = (namaTv && namaTv.toLowerCase().includes(input)) ? "flex" : "none";
+        }
+    }
+
+    // INIT
+    muatBanner(); 
+    bacaGoogleSheet();
+    setInterval(tampilkanJam, 1000);
+    setInterval(hitungMundurPertandingan, 1000);
+    tampilkanJam();
+</script>
+</body>
 </html>
