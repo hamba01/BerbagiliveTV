@@ -6528,3 +6528,51 @@ https://archive.org/download/07-des/12 Percayakan Padaku.mp3
 https://archive.org/download/07-des/13 Pria Kesepian.mp3
 #EXTINF:-1 tvg-logo="https://archive.org/services/img/07-des" group-title="indo band",sheila on 7 (07 desember) - 14 Waktu Yang Tepat Untuk Berpisah.flac
 https://archive.org/download/07-des/14 Waktu Yang Tepat Untuk Berpisah.mp3
+
+
+# ==========================================
+# DAFTAR PLAYLIST CCTV 
+# ==========================================
+
+
+#EXTINF:-1 group-title="CCTV Bandung" tvg-logo="https://atcs-dishub.bandung.go.id/assets/img/atcs.png", Pasteur - Suryasumantri
+https://atcs-dishub.bandung.go.id:1990/PaskalPTZ2/main_stream.m3u8
+
+#EXTINF:-1 group-title="CCTV Bandung" tvg-logo="https://atcs-dishub.bandung.go.id/assets/img/atcs.png", Pasteur - HOS Tjokroaminoto
+https://atcs-dishub.bandung.go.id:1990/Pasteur/main_stream.m3u8
+
+#EXTINF:-1 group-title="CCTV Bandung" tvg-logo="https://atcs-dishub.bandung.go.id/assets/img/atcs.png", Cipaganti - Pasteur
+https://atcs-dishub.bandung.go.id:1990/Cipaganti/main_stream.m3u8
+
+#EXTINF:-1 group-title="CCTV Bandung" tvg-logo="https://atcs-dishub.bandung.go.id/assets/img/atcs.png", Cihampelas - Pasteur
+https://atcs-dishub.bandung.go.id:1990/Cihampelas/main_stream.m3u8
+
+#EXTINF:-1 group-title="CCTV Bandung" tvg-logo="https://atcs-dishub.bandung.go.id/assets/img/atcs.png", Tamansari - Cikapayang
+https://atcs-dishub.bandung.go.id:1990/Tamansari/main_stream.m3u8
+
+#EXTINF:-1 group-title="CCTV Bandung" tvg-logo="https://atcs-dishub.bandung.go.id/assets/img/atcs.png", Djuanda - Cikapayang
+https://atcs-dishub.bandung.go.id:1990/Cikapayang/main_stream.m3u8
+
+#EXTINF:-1 group-title="CCTV Bandung" tvg-logo="https://atcs-dishub.bandung.go.id/assets/img/atcs.png", Djuanda - Sulanjana
+https://atcs-dishub.bandung.go.id:1990/Sulanjana/main_stream.m3u8
+
+#EXTINF:-1 group-title="CCTV Bandung" tvg-logo="https://atcs-dishub.bandung.go.id/assets/img/atcs.png", Aceh - Merdeka
+https://atcs-dishub.bandung.go.id:1990/Merdeka/main_stream.m3u8
+
+#EXTINF:-1 group-title="CCTV Bandung" tvg-logo="https://atcs-dishub.bandung.go.id/assets/img/atcs.png", Surapati - Sentot Alibasa
+https://atcs-dishub.bandung.go.id:1990/Surapati/main_stream.m3u8
+
+#EXTINF:-1 group-title="CCTV Bandung" tvg-logo="https://atcs-dishub.bandung.go.id/assets/img/atcs.png", PHH Mustofa - Pahlawan
+https://atcs-dishub.bandung.go.id:1990/Pahlawan/main_stream.m3u8
+
+#EXTINF:-1 group-title="CCTV Bandung" tvg-logo="https://atcs-dishub.bandung.go.id/assets/img/atcs.png", PHH Mustofa - Cikutra
+https://atcs-dishub.bandung.go.id:1990/Cikutra/main_stream.m3u8
+
+#EXTINF:-1 group-title="CCTV Bandung" tvg-logo="https://atcs-dishub.bandung.go.id/assets/img/atcs.png", PHH Mustofa - Cimuncang
+https://atcs-dishub.bandung.go.id:1990/Cimuncang/main_stream.m3u8
+
+#EXTINF:-1 group-title="CCTV Bandung" tvg-logo="https://atcs-dishub.bandung.go.id/assets/img/atcs.png", PHH Mustofa - Padasuka
+https://atcs-dishub.bandung.go.id:1990/Padasuka/main_stream.m3u8
+
+#EXTINF:-1 group-title="CCTV Bandung" tvg-logo="https://atcs-dishub.bandung.go.id/assets/img/atcs.png", PHH Mustofa - Ahmad Yani
+https://atcs-dishub.bandung.go.id:1990/Cicaheum/main_stream.m3u8
